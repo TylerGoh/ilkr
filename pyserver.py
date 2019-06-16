@@ -113,7 +113,7 @@ def task():
         os.makedirs(path)
     images = request.files.to_dict() #convert multidict to dict
     for image in request.files.getlist('file'):
-        image.save(path + "\\" + image.filename)
+        image.save(path + "/" + image.filename)
 
     return "done",201
 
@@ -154,14 +154,14 @@ def testImage():
     global graph
     global nn4_small2_pretrained
     font = cv2.FONT_HERSHEY_SIMPLEX
-    path = os.path.join(os.getcwd(), "\static", user, "face/test/result")
+    path = os.path.join(os.getcwd(), "/static", user, "face/test/result")
     if os.path.exists(path):
         shutil.rmtree(path)
     os.makedirs(path)
     images = request.files.to_dict()
     for image in request.files.getlist('file'):
-        image.save(path + "\\" + image.filename)
-        path1 = (path + "\\" + image.filename)
+        image.save(path + "/" + image.filename)
+        path1 = (path + "/" + image.filename)
     frame = cv2.imread(path1, 1)
     bb = alignment.getAllFaceBoundingBoxes(frame)
     if bb is not None:
