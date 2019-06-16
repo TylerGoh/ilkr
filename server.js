@@ -1,4 +1,3 @@
-const moment = require('moment-timezone');
 const express = require('express')
 const app = express()
 const path = require('path');
@@ -7,7 +6,6 @@ const mongoose = require('mongoose');
 var bodyParser = require('body-parser')
 const cors = require('cors')
 const url = `mongodb://@127.0.0.1:27017/coffeeshop?authSource=admin`;
-const io = require('socket.io')(serv, {});
 
 
 
