@@ -108,7 +108,7 @@ def task():
         abort(400)
     user = request.form.get('user')
     name = request.form.get('name')
-    path = os.path.join(os.getcwd(), "/static", user, "face/images" , name)
+    path = os.path.join(os.getcwd(), "/static", user, "/face/images" , name)
     if not os.path.exists(path):
         os.makedirs(path)
     images = request.files.to_dict() #convert multidict to dict
