@@ -24,7 +24,7 @@ CORS(app, support_credentials=True)
 
 graph = tf.get_default_graph()
 nn4_small2_pretrained = create_model()
-nn4_small2_pretrained.load_weights('C:/Users/Admin/Desktop/ilkr/server/weights/nn4.small2.v1.h5')
+nn4_small2_pretrained.load_weights(os.getcwd()+'/weights/nn4.small2.v1.h5')
 
 def align_image(img):
     return alignment.align(96, img, alignment.getLargestFaceBoundingBox(img), 
@@ -38,7 +38,7 @@ def load_image(path):
     img = cv2.imread(path, 1)
     return img[...,::-1]
 
-alignment = AlignDlib('C:/Users/Admin/Desktop/ilkr/server/models/landmarks.dat')
+alignment = AlignDlib(os.getcwd()+'/models/landmarks.dat')
 
 class IdentityMetadata():
     def __init__(self, base, name, file):
@@ -65,7 +65,7 @@ def load_metadata(path):
 
 @app.route('/faceTrain/<user>', methods=['POST'])
 def trainImage(user):
-    path = os.path.join(os.getcwd(), "server/static/" , user, "face")
+    path = (os.getcwd() + "/static/" , user, "/face")
     metadata = load_metadata(path + "/images")
     global graph
     global nn4_small2_pretrained
@@ -108,7 +108,7 @@ def task():
         abort(400)
     user = request.form.get('user')
     name = request.form.get('name')
-    path = os.path.join(os.getcwd(), "server\\static", user, "face/images" , name)
+    path = os.path.join(os.getcwd(), "\static", user, "face/images" , name)
     if not os.path.exists(path):
         os.makedirs(path)
     images = request.files.to_dict() #convert multidict to dict
@@ -119,7 +119,7 @@ def task():
 
 @app.route('/faceGetImages/<user>', methods=['POST'])
 def getImage(user):
-    path = os.path.join(os.getcwd(), "server/static" , user, "face/images")
+    path = (os.getcwd() + "/static/" + user + "/face/images")
     files = {}
     for i in os.listdir(path):
         files[i] = []
@@ -133,7 +133,7 @@ def getImage(user):
 
 @app.route('/faceClearImages/<user>', methods=['POST'])
 def clearImage(user):
-    path = os.path.join(os.getcwd(), "server/static/" , user, "face")
+    path = (os.getcwd()+ "/static/" , user, "/face")
     shutil.rmtree(path, ignore_errors=True)
     return "cleared",201
 
@@ -141,7 +141,7 @@ def clearImage(user):
 @app.route('/faceTest', methods=['POST'])
 def testImage():
     user = request.form.get('user')
-    path = os.path.join(os.getcwd(), "server/static/" , user, "face")
+    path = os.path.join(os.getcwd(), "/static/" , user, "face")
     metadata = load_metadata(path + "/images")
     targets = np.array([m.name for m in metadata])
     with open((path+'/test/embedded.pkl'), 'rb') as f:
@@ -154,7 +154,7 @@ def testImage():
     global graph
     global nn4_small2_pretrained
     font = cv2.FONT_HERSHEY_SIMPLEX
-    path = os.path.join(os.getcwd(), "server\\static", user, "face/test/result")
+    path = os.path.join(os.getcwd(), "\static", user, "face/test/result")
     if os.path.exists(path):
         shutil.rmtree(path)
     os.makedirs(path)
