@@ -176,7 +176,7 @@ def testImage():
                 identity = encoder.inverse_transform(prediction)[0]
                 cv2.putText(frame,identity,(bb[i].left(),bb[i].top()-10), font, 0.7,(0,0,255),2,cv2.LINE_AA)
     key = str(random.randint(1,1000000))
-    cv2.imwrite(path + "/" + key + '.jpg', frame)
+    cv2.imwrite(os.path.join(path, ("/" + key + '.jpg')), frame)
     os.remove(path1)
     return key,201
 
