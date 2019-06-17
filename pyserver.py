@@ -24,7 +24,7 @@ CORS(app, support_credentials=True)
 
 graph = tf.get_default_graph()
 nn4_small2_pretrained = create_model()
-nn4_small2_pretrained.load_weights(os.getcwd()+'/weights/nn4.small2.v1.h5')
+nn4_small2_pretrained.load_weights(os.path.join(os.getcwd() , 'weights/nn4.small2.v1.h5'))
 
 def align_image(img):
     return alignment.align(96, img, alignment.getLargestFaceBoundingBox(img), 
@@ -38,7 +38,7 @@ def load_image(path):
     img = cv2.imread(path, 1)
     return img[...,::-1]
 
-alignment = AlignDlib(os.getcwd()+'/models/landmarks.dat')
+alignment = AlignDlib(os.path.join(os.getcwd() , 'models/landmarks.dat'))
 
 class IdentityMetadata():
     def __init__(self, base, name, file):
@@ -65,8 +65,8 @@ def load_metadata(path):
 
 @app.route('/faceTrain/<user>', methods=['POST'])
 def trainImage(user):
-    path = (os.getcwd() + "/static/" , user, "/face")
-    metadata = load_metadata(path + "/images")
+    path = os.path.join(os.getcwd() , "static" , user, "face")
+    metadata = load_metadata(os.path.join(path , "images"))
     global graph
     global nn4_small2_pretrained
     embedded = np.zeros((metadata.shape[0], 128))
@@ -91,14 +91,14 @@ def trainImage(user):
 
     plt.legend(bbox_to_anchor=(1, 1))
     plt.tight_layout()
-    if not os.path.exists(path + '/test'):
-        os.makedirs(path + '/test')
-    plt.savefig(path + '/test/result.png')
+    if not os.path.exists(os.path.join(path , 'test')):
+        os.makedirs(os.path.join(path , 'test'))
+    plt.savefig(os.path.join(path , 'test' , 'result.png'))
     try:
-        os.remove(path+'/test/embedded.pkl')
+        os.remove(os.path.join(path , 'test' , 'embedded.pkl')
     except:
         print("doesnt exist")
-    with open((path+'/test/embedded.pkl'), 'wb') as f:
+    with open(os.path.join(path , 'test', 'embedded.pkl'), 'wb') as f:
         pickle.dump(embedded, f, pickle.HIGHEST_PROTOCOL)
     return "cleared",201
 
@@ -113,13 +113,13 @@ def task():
         os.makedirs(path)
     images = request.files.to_dict() #convert multidict to dict
     for image in request.files.getlist('file'):
-        image.save(path + "/" + image.filename)
+        image.save(os.path.join(path, image.filename))
 
     return "done",201
 
 @app.route('/faceGetImages/<user>', methods=['POST'])
 def getImage(user):
-    path = (os.getcwd() + "/static/" + user + "/face/images")
+    path = os.path.join(os.getcwd() , "static" , user , "face/images")
     files = {}
     for i in os.listdir(path):
         files[i] = []
@@ -133,7 +133,7 @@ def getImage(user):
 
 @app.route('/faceClearImages/<user>', methods=['POST'])
 def clearImage(user):
-    path = (os.getcwd()+ "/static/" , user, "/face")
+    path = os.path.join(os.getcwd() , "static" , user , "face")
     shutil.rmtree(path, ignore_errors=True)
     return "cleared",201
 
@@ -141,8 +141,8 @@ def clearImage(user):
 @app.route('/faceTest', methods=['POST'])
 def testImage():
     user = request.form.get('user')
-    path = os.path.join(os.getcwd(), "/static/" , user, "face")
-    metadata = load_metadata(path + "/images")
+    path = os.path.join(os.getcwd(), "static" , user, "face")
+    metadata = load_metadata(os.path.join(path , "images"))
     targets = np.array([m.name for m in metadata])
     with open((path+'/test/embedded.pkl'), 'rb') as f:
         embedded = pickle.load(f)
@@ -154,14 +154,14 @@ def testImage():
     global graph
     global nn4_small2_pretrained
     font = cv2.FONT_HERSHEY_SIMPLEX
-    path = os.path.join(os.getcwd(), "/static", user, "face/test/result")
+    path = os.path.join(os.getcwd(), "static", user, "face", "test" , "result")
     if os.path.exists(path):
         shutil.rmtree(path)
     os.makedirs(path)
     images = request.files.to_dict()
     for image in request.files.getlist('file'):
-        image.save(path + "/" + image.filename)
-        path1 = (path + "/" + image.filename)
+        image.save(os.path.join(path , image.filename))
+        path1 = os.path.join(path, image.filename)
     frame = cv2.imread(path1, 1)
     bb = alignment.getAllFaceBoundingBoxes(frame)
     if bb is not None:
