@@ -95,7 +95,7 @@ def trainImage(user):
         os.makedirs(os.path.join(path , 'test'))
     plt.savefig(os.path.join(path , 'test' , 'result.png'))
     try:
-        os.remove(os.path.join(path , 'test' , 'embedded.pkl')
+        os.remove(os.path.join(path , 'test' , 'embedded.pkl'))
     except:
         print("doesnt exist")
     with open(os.path.join(path , 'test', 'embedded.pkl'), 'wb') as f:
