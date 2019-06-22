@@ -12,7 +12,7 @@ var io = require('socket.io')(serv, {});
 SOCKET_LIST = {};
 
 mongoose.connect(url, {useNewUrlParser: true});
-serv.listen(80);
+serv.listen(8080);
 app.use(cors());
 app.use(bodyParser.json())
 console.log("Server started.");
