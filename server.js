@@ -6,8 +6,10 @@ const mongoose = require('mongoose');
 var bodyParser = require('body-parser')
 const cors = require('cors')
 const url = `mongodb://@127.0.0.1:27017/coffeeshop?authSource=admin`;
+var io = require('socket.io')(serv, {});
 
 
+SOCKET_LIST = {};
 
 mongoose.connect(url, {useNewUrlParser: true});
 serv.listen(80);
@@ -119,3 +121,22 @@ const accountSchema = mongoose.Schema({
 })
 
 const Account = mongoose.model('Account', accountSchema);
+io.sockets.on('connection',(socket)=> {
+    console.log("connection");
+    socket.id = Math.random();
+    SOCKET_LIST[socket.id] = socket;
+    socket.emit('test', {result:"testy"})
+
+    socket.on('disconnect', ()=> {
+        delete SOCKET_LIST[socket.id];
+        console.log(Object.keys(SOCKET_LIST).length);
+    });
+
+    socket.on('end', function() {
+        socket.disconnect();
+    });
+});
+
+
+
+
