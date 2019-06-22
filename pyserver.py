@@ -5,17 +5,17 @@ import json
 import shutil
 import numpy as np
 import random
+import tensorflow as tf
+import matplotlib.pyplot as plt
+import pickle
+from sklearn.preprocessing import LabelEncoder
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.manifold import TSNE
+from sklearn.svm import LinearSVC
 from flask import Flask, request, abort
 from flask_cors import CORS
 from align import AlignDlib
 from model import create_model
-import tensorflow as tf
-from sklearn.manifold import TSNE
-from sklearn.preprocessing import LabelEncoder
-from sklearn.neighbors import KNeighborsClassifier
-from sklearn.svm import LinearSVC
-import matplotlib.pyplot as plt
-import pickle
 
 
 app = Flask(__name__)
@@ -25,6 +25,7 @@ CORS(app, support_credentials=True)
 graph = tf.get_default_graph()
 nn4_small2_pretrained = create_model()
 nn4_small2_pretrained.load_weights(os.path.join(os.getcwd() , 'weights/nn4.small2.v1.h5'))
+alignment = AlignDlib(os.path.join(os.getcwd() , 'models/landmarks.dat'))
 
 def align_image(img):
     return alignment.align(96, img, alignment.getLargestFaceBoundingBox(img), 
@@ -38,7 +39,6 @@ def load_image(path):
     img = cv2.imread(path, 1)
     return img[...,::-1]
 
-alignment = AlignDlib(os.path.join(os.getcwd() , 'models/landmarks.dat'))
 
 class IdentityMetadata():
     def __init__(self, base, name, file):
@@ -65,10 +65,10 @@ def load_metadata(path):
 
 @app.route('/faceTrain/<user>', methods=['POST'])
 def trainImage(user):
-    path = os.path.join(os.getcwd() , "static" , user, "face")
-    metadata = load_metadata(os.path.join(path , "images"))
     global graph
     global nn4_small2_pretrained
+    path = os.path.join(os.getcwd() , "static" , user, "face")
+    metadata = load_metadata(os.path.join(path , "images"))
     embedded = np.zeros((metadata.shape[0], 128))
     for i, m in enumerate(metadata):
         img = load_image(m.image_path())
@@ -140,6 +140,8 @@ def clearImage(user):
 
 @app.route('/faceTest', methods=['POST'])
 def testImage():
+    global graph
+    global nn4_small2_pretrained
     user = request.form.get('user')
     path = os.path.join(os.getcwd(), "static" , user, "face")
     metadata = load_metadata(os.path.join(path , "images"))
@@ -151,8 +153,6 @@ def testImage():
     y = encoder.transform(targets)
     svc = LinearSVC()
     svc.fit(embedded, y)
-    global graph
-    global nn4_small2_pretrained
     font = cv2.FONT_HERSHEY_SIMPLEX
     path = os.path.join(os.getcwd(), "static", user, "face", "test" , "result")
     if os.path.exists(path):
@@ -184,4 +184,4 @@ def testImage():
 
 
 if __name__ == "__main__":
-    app.run(host= '0.0.0.0')
+    app.run()
